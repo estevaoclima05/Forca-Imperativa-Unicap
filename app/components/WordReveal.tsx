@@ -26,7 +26,7 @@ export default function WordReveal({
 
         return (
           <span key={index} className={spanClass}>
-            {isVisible ? letter : '_'}
+            {isVisible ? letter : '_ '}
           </span>
         );
       })}
