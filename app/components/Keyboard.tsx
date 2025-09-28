@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface Props {
   alphabet: string[];
   guessed: string[];
@@ -10,33 +12,39 @@ interface Props {
   wrongClassName?: string;
 }
 
-export default function Keyboard({
+const Keyboard: React.FC<Props> = ({
   alphabet,
   guessed,
   wrong,
   onGuess,
   disabled,
   className,
-  buttonClassName,
-  guessedClassName,
-  wrongClassName,
-}: Props) {
+  buttonClassName = '',
+  guessedClassName = '',
+  wrongClassName = '',
+}) => {
   return (
     <div className={className}>
-      {alphabet.map(letter => {
-        const tried = guessed.includes(letter) || wrong.includes(letter);
-        let buttonClasses = buttonClassName ?? '';
+      {alphabet.map((letter) => {
+        const isGuessed = guessed.includes(letter);
+        const isWrong = wrong.includes(letter);
+        const isTried = isGuessed || isWrong;
 
-        if (guessed.includes(letter)) buttonClasses += ` ${guessedClassName ?? ''}`;
-        if (wrong.includes(letter)) buttonClasses += ` ${wrongClassName ?? ''}`;
-        if (!tried) buttonClasses += ' hover:bg-gray-200 transition-colors';
+        const classes = [
+          buttonClassName,
+          isGuessed && guessedClassName,
+          isWrong && wrongClassName,
+          !isTried && 'hover:bg-gray-200 transition-colors',
+        ]
+          .filter(Boolean)
+          .join(' ');
 
         return (
           <button
             key={letter}
             onClick={() => onGuess(letter)}
-            disabled={disabled || tried}
-            className={buttonClasses.trim()}
+            disabled={disabled || isTried}
+            className={classes}
           >
             {letter}
           </button>
@@ -44,6 +52,6 @@ export default function Keyboard({
       })}
     </div>
   );
-}
+};
 
-
+export default Keyboard;
