@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import HangmanSVG from './components/HangmanSVG';
 import WordReveal from './components/WordReveal';
 import Keyboard from './components/Keyboard';
@@ -11,45 +11,47 @@ import styles from './Hangman.module.css';
 import { getRandomWord, alphabet, maxErrors } from '../utils/gameConfig';
 
 export default function Page() {
-  // States que faltavam
   const [secretWord, setSecretWord] = useState('');
   const [guessedLetters, setGuessedLetters] = useState<string[]>([]);
   const [wrongLetters, setWrongLetters] = useState<string[]>([]);
   const [attemptsLeft, setAttemptsLeft] = useState(maxErrors);
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
 
-  useEffect(() => {
-    startNewGame();
-  }, []);
-
-  function startNewGame() {
+  // Inicializa o jogo
+  const startNewGame = useCallback(() => {
     const word = getRandomWord();
     setSecretWord(word);
     setGuessedLetters([]);
     setWrongLetters([]);
     setAttemptsLeft(maxErrors);
     setStatus('playing');
-  }
+  }, []);
 
-  function handleGuess(letter: string) {
+  useEffect(() => {
+    startNewGame();
+  }, [startNewGame]);
+
+  // Trata o chute de uma letra
+  const handleGuess = (letter: string) => {
     if (status !== 'playing') return;
     if (guessedLetters.includes(letter) || wrongLetters.includes(letter)) return;
 
     if (secretWord.includes(letter)) {
-      const newGuessed = [...guessedLetters, letter];
-      setGuessedLetters(newGuessed);
-      if (secretWord.split('').every(l => newGuessed.includes(l))) {
-        setStatus('won');
-      }
+      const updatedGuessed = [...guessedLetters, letter];
+      setGuessedLetters(updatedGuessed);
+
+      const hasWon = secretWord.split('').every((l) => updatedGuessed.includes(l));
+      if (hasWon) setStatus('won');
     } else {
-      setWrongLetters([...wrongLetters, letter]);
-      const newAttemptsLeft = attemptsLeft - 1;
-      setAttemptsLeft(newAttemptsLeft);
-      if (newAttemptsLeft <= 0) {
-        setStatus('lost');
-      }
+      const updatedWrong = [...wrongLetters, letter];
+      const remainingAttempts = attemptsLeft - 1;
+
+      setWrongLetters(updatedWrong);
+      setAttemptsLeft(remainingAttempts);
+
+      if (remainingAttempts <= 0) setStatus('lost');
     }
-  }
+  };
 
   return (
     <main className={styles.container}>
@@ -65,29 +67,38 @@ export default function Page() {
         wrong={wrongLetters}
         onGuess={handleGuess}
         disabled={status !== 'playing'}
+        className={styles.keyboard}
+        buttonClassName={styles.keyButton}
+        guessedClassName={styles.correctKey}
+        wrongClassName={styles.wrongKey}
       />
 
-      <HistoryPanel correct={guessedLetters} wrong={wrongLetters} attemptsLeft={attemptsLeft} />
+      <HistoryPanel
+        correct={guessedLetters}
+        wrong={wrongLetters}
+        attemptsLeft={attemptsLeft}
+        className={styles.historyPanel}
+        correctClassName={styles.correctLetter}
+        wrongClassName={styles.wrongLetter}
+      />
 
       {status !== 'playing' && (
         <div className={styles.statusContainer}>
-          {status === 'won' && <p className={styles.winMessage}>Parabéns! Você venceu!</p>}
-          {status === 'lost' && (
-            <p className={styles.loseMessage}>
-              Você perdeu. A palavra era <strong>{secretWord}</strong>.
+          {status === 'won' && (
+            <p className={`${styles.statusMessage} ${styles.winMessage}`}>
+              🎉 Parabéns! Você venceu!
             </p>
           )}
-          <button className={styles.restartButton} onClick={startNewGame}>
-            Reiniciar
+          {status === 'lost' && (
+            <p className={`${styles.statusMessage} ${styles.loseMessage}`}>
+              😢 Você perdeu. A palavra era <strong>{secretWord}</strong>.
+            </p>
+          )}
+          <button onClick={startNewGame} className={styles.restartButton}>
+            🔁 Reiniciar
           </button>
         </div>
       )}
     </main>
   );
 }
-
-
-
-
-
-
