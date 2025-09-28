@@ -20,6 +20,7 @@ export default function WordReveal({
     fontFamily: 'monospace',
     fontSize: '2.5rem',
     justifyContent: 'center',
+      marginBottom: '24px'
   };
 
   const letterStyle: React.CSSProperties = {
