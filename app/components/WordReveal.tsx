@@ -10,20 +10,26 @@ export default function WordReveal({
   word,
   guessed,
   className,
-  letterClassName,
-  hiddenLetterClassName,
+  letterClassName = '',
+  hiddenLetterClassName = '',
 }: Props) {
   return (
     <div className={className}>
-      {word.split('').map((letter, i) => (
-        <span
-          key={i}
-          className={`${letterClassName ?? ''} ${guessed.includes(letter) ? '' : hiddenLetterClassName ?? ''}`}
-        >
-          {guessed.includes(letter) ? letter : '_'}
-        </span>
-      ))}
+      {word.split('').map((letter, index) => {
+        const isVisible = guessed.includes(letter);
+        const spanClass = [
+          letterClassName,
+          !isVisible && hiddenLetterClassName
+        ]
+          .filter(Boolean)
+          .join(' ');
+
+        return (
+          <span key={index} className={spanClass}>
+            {isVisible ? letter : '_'}
+          </span>
+        );
+      })}
     </div>
   );
 }
-

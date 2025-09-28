@@ -55,7 +55,7 @@ export default function Page() {
 
   return (
     <main className={styles.container}>
-      <h1 className={styles.title}>Jogo da Forca</h1>
+      <h1 className={styles.title}>JOGO DA FORCA</h1>
 
       <HangmanSVG errors={maxErrors - attemptsLeft} className={styles.hangmanSVG} />
 
